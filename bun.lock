@@ -5,34 +5,34 @@
     "": {
       "name": "@sudobility/heavymath_lib",
       "devDependencies": {
-        "@eslint/js": "^9.39.2",
-        "@sudobility/auctions_contracts": "^0.1.22",
+        "@eslint/js": "~9.39.5",
+        "@sudobility/auctions_contracts": "^0.1.23",
         "@sudobility/heavymath_contracts": "^0.1.79",
         "@sudobility/heavymath_indexer_client": "^0.0.66",
-        "@sudobility/heavymath_types": "^0.0.37",
-        "@sudobility/types": "^1.9.74",
-        "@tanstack/react-query": "^5.90.5",
-        "@testing-library/react": "^16.3.2",
-        "@types/node": "^24.9.1",
-        "@types/react": "^19.2.2",
-        "@typescript-eslint/eslint-plugin": "^8.46.2",
-        "@typescript-eslint/parser": "^8.46.2",
-        "eslint": "^9.38.0",
-        "eslint-config-prettier": "^10.1.8",
-        "eslint-plugin-prettier": "^5.5.4",
-        "eslint-plugin-react-hooks": "^7.0.1",
-        "happy-dom": "^20.3.4",
-        "prettier": "^3.6.2",
-        "react": "^19.2.1",
-        "typescript": "^5.9.3",
-        "vitest": "^4.0.4",
+        "@sudobility/heavymath_types": "^0.0.38",
+        "@sudobility/types": "^1.9.75",
+        "@tanstack/react-query": "~5.104.5",
+        "@testing-library/react": "~16.3.3",
+        "@types/node": "~24.19.2",
+        "@types/react": "~19.3.0",
+        "@typescript-eslint/eslint-plugin": "~8.72.0",
+        "@typescript-eslint/parser": "~8.72.0",
+        "eslint": "~9.39.5",
+        "eslint-config-prettier": "~10.1.8",
+        "eslint-plugin-prettier": "~5.5.7",
+        "eslint-plugin-react-hooks": "~7.1.1",
+        "happy-dom": "~20.14.6",
+        "prettier": "~3.9.10",
+        "react": "~19.3.1",
+        "typescript": "~5.9.3",
+        "vitest": "~4.1.12",
       },
       "peerDependencies": {
-        "@sudobility/auctions_contracts": "^0.1.22",
+        "@sudobility/auctions_contracts": "^0.1.23",
         "@sudobility/heavymath_contracts": "^0.1.79",
         "@sudobility/heavymath_indexer_client": "^0.0.66",
-        "@sudobility/heavymath_types": "^0.0.37",
-        "@sudobility/types": "^1.9.74",
+        "@sudobility/heavymath_types": "^0.0.38",
+        "@sudobility/types": "^1.9.75",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
       },
@@ -435,7 +435,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/auctions_contracts": ["@sudobility/auctions_contracts@0.1.22", "https://npm.pkg.github.com/download/@sudobility/auctions_contracts/0.1.22/228a601caa068439aac71e0ec83cf7dcd1c2b134", { "peerDependencies": { "@solana/spl-token": ">=0.4.0", "@solana/web3.js": ">=1.95.0", "@tanstack/react-query": ">=5.0.0", "buffer": ">=6.0.0", "react": "^18.0.0 || ^19.0.0", "react-native": ">=0.70.0", "react-native-get-random-values": ">=1.8.0", "react-native-url-polyfill": ">=2.0.0", "text-encoding": ">=0.7.0", "viem": ">=2.0.0" } }, "sha512-EtDI5m1Q9Vhmpc4WpNeY94R1mRKxgJ9hu9yIHllNmPO4QmU4hTCTdhUY9TLKdtT04jN7GsPbqEskGuHIJfaTGA=="],
+    "@sudobility/auctions_contracts": ["@sudobility/auctions_contracts@0.1.23", "https://npm.pkg.github.com/download/@sudobility/auctions_contracts/0.1.23/8a346c4963c8210e0fedec880e8426ae9f5d5346", { "peerDependencies": { "@solana/spl-token": ">=0.4.0", "@solana/web3.js": ">=1.95.0", "@tanstack/react-query": ">=5.0.0", "buffer": ">=6.0.0", "react": "^18.0.0 || ^19.0.0", "react-native": ">=0.70.0", "react-native-get-random-values": ">=1.8.0", "react-native-url-polyfill": ">=2.0.0", "text-encoding": ">=0.7.0", "viem": ">=2.0.0" } }, "sha512-r7k058GWV8ysM+d0WE9h+FqsBuQSe0QS+bjUJHK7bFAz75fJOYnkheWYp7aGmgj8xVFdjEJr/2rha/p9mYSC1g=="],
 
     "@sudobility/configs": ["@sudobility/configs@0.0.79", "https://npm.pkg.github.com/download/@sudobility/configs/0.0.79/ede67f788faed20c33c69c6f4c061d3acc0527fc", { "peerDependencies": { "@sudobility/types": "^1.9.74" } }, "sha512-7z8n1wEYewdE/jQyNqpxVnLSvha0zRrcb8ceP8vZn13fnd1JNi0bYg6xIJNOB9x6tiEXUP/71pbtLgwsSJ1QzQ=="],
 
@@ -443,9 +443,9 @@
 
     "@sudobility/heavymath_indexer_client": ["@sudobility/heavymath_indexer_client@0.0.66", "https://npm.pkg.github.com/download/@sudobility/heavymath_indexer_client/0.0.66/43c8887a6562a5dfa3d50912285577e11db2a1b3", { "peerDependencies": { "@sudobility/heavymath_types": "^0.0.37", "@sudobility/types": "^1.9.74", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0", "zustand": "^5.0.0" } }, "sha512-+l9bzavwlnNANQKSBWQAWl/d3KxDPoTMDlSb6NUFJQs19tZU7gbDR3eeRCX17u44mVvt7wv4XOkd7aZp4fmKAg=="],
 
-    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.37", "https://npm.pkg.github.com/download/@sudobility/heavymath_types/0.0.37/bc2eb73636a01cc00f4fefb888f713961b4e46fe", { "peerDependencies": { "viem": "^2.0.0" } }, "sha512-JxlmRC/f8pK9/LxjKva9Pa7l5dc9jhVq3OxzzsyUa/RmIdR7Dq2XxD/u/U7ZKX15H77Y98iya+bOU5xK/9LHHA=="],
+    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.38", "https://npm.pkg.github.com/download/@sudobility/heavymath_types/0.0.38/83b494e1f00732a87d526d2e9734643e32e3ae40", { "peerDependencies": { "viem": "^2.0.0" } }, "sha512-pcNPnAqrA4r8mqhaD3XE1vMMjFNPWlWC52L9Q0DkZRtSbuKhgOmCaf7mkxVrKgu4VNK4RdyDWQm3oQAaQfCClQ=="],
 
-    "@sudobility/types": ["@sudobility/types@1.9.74", "https://npm.pkg.github.com/download/@sudobility/types/1.9.74/f9ad864ba5d8d1097e7e48378ebee8aa7e129e88", {}, "sha512-jgt0F1r71qjFNiRNn/1YlL4JU65sjnzYd8Sfi+Y9z62Lu9VhIXeqWAH12u7/hmGPZqG3nxzn0V+s3sFkB1qWuQ=="],
+    "@sudobility/types": ["@sudobility/types@1.9.75", "https://npm.pkg.github.com/download/@sudobility/types/1.9.75/d041222e1a9c48b1857a25686361fa493265e572", {}, "sha512-c0IqHhNsyMxWFzv+sC8drTXid1s/yberzme5JJTYIR2CE+DxpnjFCyL0AIMKUwTQYhYKvRZG0JkWRFplirbBrw=="],
 
     "@swc/helpers": ["@swc/helpers@0.5.23", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw=="],
 
@@ -1392,8 +1392,6 @@
     "@solana/rpc-types/@solana/codecs-numbers": ["@solana/codecs-numbers@8.5.0", "", { "dependencies": { "@solana/codecs-core": "8.5.0", "@solana/errors": "8.5.0" }, "peerDependencies": { "typescript": ">=5.4.0" }, "optionalPeers": ["typescript"] }, "sha512-6Vtf52rHzjf98ykejn9bNGMaQ2k1f4UMIa+BGMbBy4mIRQ5ggdI5oCAb3sZPfJcel2JQHwDlsLHCYdpqC+n6Mg=="],
 
     "@solana/rpc-types/@solana/codecs-strings": ["@solana/codecs-strings@8.5.0", "", { "dependencies": { "@solana/codecs-core": "8.5.0", "@solana/codecs-numbers": "8.5.0", "@solana/errors": "8.5.0" }, "peerDependencies": { "fastestsmallesttextencoderdecoder": "^1.0.22", "typescript": ">=5.4.0" }, "optionalPeers": ["fastestsmallesttextencoderdecoder", "typescript"] }, "sha512-9lCSCUVkbPLb1o9PLDsaOatdVgrUqqWMrAqJvZPyyuvrC5++wPuKRIGq+5iU3lICY+AwWxrzVyiwdu4xaZVCiw=="],
-
-    "@solana/spl-token-group/@solana/web3.js": ["@solana/web3.js@1.99.0", "", { "dependencies": { "@babel/runtime": "^7.29.7", "@noble/curves": "^1.9.7", "@noble/hashes": "^1.8.0", "@solana/buffer-layout": "^4.0.1", "@solana/codecs-numbers": "^5.5.1", "agentkeepalive": "^4.6.0", "bn.js": "^5.2.5", "borsh": "^0.7.0", "bs58": "^4.0.1", "buffer": "6.0.3", "fast-stable-stringify": "^1.0.0", "jayson": "^4.3.0", "node-fetch": "^2.7.0", "rpc-websockets": "^9.0.2", "superstruct": "^2.0.2" } }, "sha512-QZYQ2T1z6xWisoyALPq25i/QZTsRlM02BABtAsfaQ1p8wX4SdTfxrKTRue/ZZqrhNVh5oL7T/DUFiTS9DRgxow=="],
 
     "@solana/spl-token-metadata/@solana/web3.js": ["@solana/web3.js@1.99.0", "", { "dependencies": { "@babel/runtime": "^7.29.7", "@noble/curves": "^1.9.7", "@noble/hashes": "^1.8.0", "@solana/buffer-layout": "^4.0.1", "@solana/codecs-numbers": "^5.5.1", "agentkeepalive": "^4.6.0", "bn.js": "^5.2.5", "borsh": "^0.7.0", "bs58": "^4.0.1", "buffer": "6.0.3", "fast-stable-stringify": "^1.0.0", "jayson": "^4.3.0", "node-fetch": "^2.7.0", "rpc-websockets": "^9.0.2", "superstruct": "^2.0.2" } }, "sha512-QZYQ2T1z6xWisoyALPq25i/QZTsRlM02BABtAsfaQ1p8wX4SdTfxrKTRue/ZZqrhNVh5oL7T/DUFiTS9DRgxow=="],
 
