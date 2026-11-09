@@ -1,344 +1,136 @@
 # CLAUDE.md - @sudobility/heavymath_lib
 
-> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
-> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
-> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
-> finishing a task is not permission to commit it.
+> **Git policy — never auto-commit or auto-push.** Leave work in the working tree.
+> Run `git commit` / `git push` / `gh pr create` **only when the user asks in that turn**.
+> Finishing a task is not permission to commit it. Do not use feature branches; stay on the current branch.
 
-## Project Overview
+## What it is
 
-`@sudobility/heavymath_lib` is a React hooks library that wraps sports data fetching with user favorites management from `@sudobility/heavymath_indexer_client`. Every hook fetches sports data via the indexer proxy, fetches the user's favorites, then merges them so each item has a `favorited: boolean` flag and a `setFavorited()` method.
+Platform-agnostic React **hooks** library for the Heavymath prediction market platform
+(works on React web and React Native). Every hook fetches sports data via a proxy hook from
+`@sudobility/heavymath_indexer_client`, fetches the user's favorites via that client's
+`useFavorites`, and merges them so each item gets a `favorited: boolean` flag and a
+`setFavorited(id, bool)` method. The library adds the favorites-merge layer on top of the
+indexer client — it does no network/contract work of its own.
 
-The library is platform-agnostic (works on both React web and React Native) and is part of the Heavymath prediction market ecosystem.
+Package `@sudobility/heavymath_lib` (BUSL-1.1, author John Huang). ESM-only (`"type": "module"`),
+published to **GitHub Packages** (`@sudobility` scope → `https://npm.pkg.github.com`, see `.npmrc`).
 
-**Package**: `@sudobility/heavymath_lib` (v0.0.82, BUSL-1.1 license)
-**Author**: John Huang
+## Stack
 
-## Quick Commands
+- TypeScript 6.0 (strict, all strict flags; target ES2020, module ESNext, `moduleResolution: bundler`, `jsx: react`)
+- Vitest 4 (happy-dom env), `@testing-library/react`
+- ESLint 10 (flat config) + Prettier 3
+- Bun as package manager / script runner; peer deps: `@tanstack/react-query` >=5, `react` >=18
+
+## Commands (verified against package.json)
 
 ```bash
-bun run build           # Compile TypeScript (uses tsconfig.build.json)
-bun run build:watch     # Compile with watch mode
-bun run clean           # Remove dist/
-bun run test            # Run tests once (vitest run)
-bun run test:watch      # Run tests in watch mode (vitest)
-bun run lint            # ESLint check on src/
-bun run lint:fix        # ESLint auto-fix
-bun run format          # Prettier format src/
-bun run format:check    # Prettier check src/
-bun run typecheck       # TypeScript type validation (no emit)
-bun run verify          # Run typecheck + lint + test (use before committing)
-bun run prepublishOnly  # Clean + build (runs automatically on publish)
+bun run build          # tsc -p tsconfig.build.json, then node scripts/fix-esm-imports.mjs
+bun run build:watch    # tsc --watch
+bun run clean          # rm -rf dist
+bun run test:unit      # vitest run (single pass) — THERE IS NO `bun run test`
+bun run test:watch     # vitest (watch)
+bun run typecheck      # tsc --noEmit
+bun run lint           # eslint src
+bun run lint:fix       # eslint --fix
+bun run format         # prettier --write
+bun run verify         # typecheck + lint + test:unit  (run before committing)
 ```
 
-**Before committing**, run:
-```bash
-bun run verify
+No `test`, `test:coverage`, or `test:run` script. For coverage run `bunx vitest run --coverage`
+(v8 provider, 70% threshold for branches/functions/lines/statements, config in `vitest.config.ts`).
+Scripts call `vitest`/`tsc` from `node_modules/.bin`, so `bun install` must have run first.
+
+## Layout
+
+```
+src/
+  index.ts                     # re-exports ./hooks and ./market
+  hooks/
+    index.ts                   # re-exports ./sports, ./useFavorites, ./useDiscussionForEntity
+    useFavorites.ts            # enriches raw favorites with resolved names/images (24h staleTime+gcTime)
+    useDiscussionForEntity.ts  # discussion metadata + auth state composition
+    sports/
+      index.ts                 # re-exports all 10 sport dirs
+      football|basketball|nfl|baseball|hockey|rugby|handball|volleyball/
+                               #   use{Sport}Leagues/Teams/Games(.ts) + __tests__/
+      mma/                     # useMmaCategories / useMmaFighters / useMmaFights
+      f1/                      # useF1Drivers / useF1Teams / useF1Races / useF1Circuits
+      utils/seasons.ts         # season normalize / latest-season helpers
+  market/index.ts              # empty: `export {}` (equilibrium code removed)
+  __tests__/index.test.ts      # smoke test: all hooks are exported
+  test/setup.ts                # vitest setup (afterEach cleanup)
 ```
 
-## Project Structure
+Tests: 33 `*.test.ts` files, ~199 cases. Build config `tsconfig.build.json` extends `tsconfig.json`
+but also excludes `**/__tests__/**`.
 
-```
-heavymath_lib/
-├── src/
-│   ├── index.ts                          # Root exports (re-exports ./hooks)
-│   ├── hooks/
-│   │   ├── index.ts                      # Re-exports ./sports, ./useFavorites, ./useDiscussionForEntity
-│   │   ├── useFavorites.ts                # Favorites with resolved display names
-│   │   ├── useDiscussionForEntity.ts       # Discussion + auth state composition
-│   │   └── sports/
-│   │       ├── index.ts                  # Re-exports all 10 sport modules
-│   │       ├── football/
-│   │       │   ├── index.ts
-│   │       │   ├── useFootballLeagues.ts
-│   │       │   ├── useFootballTeams.ts
-│   │       │   ├── useFootballMatches.ts
-│   │       │   └── __tests__/            # Tests for all 3 football hooks
-│   │       ├── basketball/               # useBasketballLeagues, Teams, Games
-│   │       ├── nfl/                      # useNflLeagues, Teams, Games
-│   │       ├── baseball/                 # useBaseballLeagues, Teams, Games
-│   │       ├── hockey/                   # useHockeyLeagues, Teams, Games
-│   │       ├── rugby/                    # useRugbyLeagues, Teams, Games
-│   │       ├── handball/                 # useHandballLeagues, Teams, Games
-│   │       ├── volleyball/               # useVolleyballLeagues, Teams, Games
-│   │       ├── mma/                      # useMmaCategories, Fighters, Fights
-│   │       ├── f1/                       # useF1Drivers, Teams, Races, Circuits
-│   │       ├── utils/
-│   │       │   └── seasons.ts             # Season lookup utilities
-│   ├── __tests__/
-│   │   └── index.test.ts                # Smoke tests for root exports
-│   └── test/
-│       └── setup.ts                      # Vitest setup (global afterEach cleanup)
-├── package.json
-├── tsconfig.json                         # Full strict TS config (ES2020, bundler resolution)
-├── tsconfig.build.json                   # Extends tsconfig.json, excludes tests
-├── eslint.config.js                      # ESLint flat config with TS + Prettier + react-hooks
-├── vitest.config.ts                      # Vitest with happy-dom, coverage thresholds at 70%
-├── .prettierrc                           # Single quotes, trailing commas, 80 width, 2-space indent
-└── .gitignore
-```
+## The core pattern (every sports hook is identical)
 
-## The Core Pattern: Sports Hook + Favorites
-
-Every hook in this library follows the same pattern. Understanding one means understanding all of them.
-
-### How It Works
-
-1. **Fetch sports data** using a proxy hook from `@sudobility/heavymath_indexer_client` (e.g., `useFootballLeagues`)
-2. **Fetch user favorites** using `useFavorites` from `@sudobility/heavymath_indexer_client`, filtered by category/subcategory/type
-3. **Build a `Set` of favorited IDs** from the favorites response for O(1) lookup
-4. **Merge** the sports data with a `favorited: boolean` field on each item
-5. **Expose `setFavorited(id, bool)`** that calls `addFavorite.mutateAsync()` or `removeFavorite.mutateAsync()`
-
-### Signature Pattern
-
-```typescript
+```ts
 function useXxxYyy(
-  indexerClient: IndexerClient,           // For favorites API calls
-  walletAddress: string | undefined,      // User's wallet (undefined = no favorites)
-  options?: UseXxxYyyOptions              // { params?, enabled? }
-): UseXxxYyyResult
-```
-
-### Return Type Pattern
-
-```typescript
-interface UseXxxYyyResult {
-  items: XxxYyyWithFavorite[];     // Data with favorited flag
-  isLoading: boolean;              // True if EITHER query is loading
-  isError: boolean;                // Error from sports data query
-  error: Error | null;             // Error from sports data query
+  indexerClient: IndexerClient,        // for the favorites API calls
+  walletAddress: string | undefined,   // undefined => no favorites fetched
+  options?: { params?; enabled? }
+): {
+  items: XxxYyyWithFavorite[];   // sports data, each with a `favorited` flag
+  isLoading: boolean;            // true if EITHER the sports OR favorites query is loading
+  isError: boolean;              // from the sports query ONLY (not favorites)
+  error: Error | null;           // from the sports query ONLY
   setFavorited: (id: number, favorited: boolean) => Promise<void>;
-  favoritesLoading: boolean;       // Loading state of favorites specifically
-  addFavoritePending: boolean;     // Mutation in progress
-  removeFavoritePending: boolean;  // Mutation in progress
+  favoritesLoading: boolean;
+  addFavoritePending: boolean;
+  removeFavoritePending: boolean;
 }
 ```
 
-### Favorites Category Scheme
+Internals: call the indexer_client proxy hook for data + `useFavorites` for the user's favorites,
+build a `Set` of favorited IDs for O(1) lookup, merge a `favorited` flag onto each item.
+Favorites use a three-level key `category='sports'` / `subcategory=<sport>` / `type`
+(e.g. football `league|team|match`; most team sports `league|team|game`;
+mma `category|fighter|fight`; f1 `driver|team|race|circuit`).
 
-Favorites are stored with a three-level key: `category` / `subcategory` / `type`.
+## Conventions
 
-| Sport      | subcategory   | Types                          |
-|------------|---------------|--------------------------------|
-| Football   | `football`    | `league`, `team`, `match`      |
-| Basketball | `basketball`  | `league`, `team`, `game`       |
-| NFL        | `nfl`         | `league`, `team`, `game`       |
-| Baseball   | `baseball`    | `league`, `team`, `game`       |
-| Hockey     | `hockey`      | `league`, `team`, `game`       |
-| Rugby      | `rugby`       | `league`, `team`, `game`       |
-| Handball   | `handball`    | `league`, `team`, `game`       |
-| Volleyball | `volleyball`  | `league`, `team`, `game`       |
-| MMA        | `mma`         | `category`, `fighter`, `fight` |
-| F1         | `f1`          | `driver`, `team`, `race`, `circuit` |
+- Files `use{Sport}{Entity}.ts`; types `{Sport}{Entity}WithFavorite`, `Use{Sport}{Entity}Options/Result`.
+- Favorites constants are file-level consts: `FAVORITES_CATEGORY/SUBCATEGORY/TYPE`.
+- Interface types co-located with their hook (no central `types/` dir).
+- Each sport dir has an `index.ts` re-export; tests live in a sibling `__tests__/`.
+- ESLint: `no-explicit-any` off; unused vars must be prefixed `_`; `prefer-const`/`no-var`/
+  `object-shorthand`/`prefer-template` are errors; `react-hooks/exhaustive-deps` warns; test files
+  are excluded from lint entirely (via `ignores`).
+- Prettier: single quotes, semicolons, trailing commas `es5`, width 80, 2-space, `arrowParens: avoid`, LF.
+- Test pattern: `vi.mock('@sudobility/heavymath_indexer_client')`, wrap `renderHook` in a
+  `QueryClientProvider` (with `retry: false`), set default mocks in `beforeEach`.
 
-All use `category = 'sports'`.
+## Gotchas
 
-## Available Hooks by Sport
+- **No `bun run test`** — use `bun run test:unit` (single) or `bun run test:watch`.
+- **Football uses "Matches"** (`useFootballMatches`) wrapping the API's fixtures; all other
+  team sports use "Games". **MMA** uses categories/fighters/fights; **F1** has four entity types.
+- **MMA categories are strings**, not objects with numeric IDs.
+- **ID type mismatch**: sports API returns numeric IDs, favorites store strings — hooks `String(id)` when comparing/storing.
+- `isLoading` = sports OR favorites loading; `isError`/`error` = sports query only.
+- Build uses `tsconfig.build.json` (not `tsconfig.json`); output `dist/**/*` only. A post-build
+  step (`scripts/fix-esm-imports.mjs`) rewrites extensionless relative imports to explicit `.js`
+  paths so Node's native ESM loader accepts the output. Stale `dist/market/` artifacts may remain
+  until the next `clean && build`.
 
-### Standard team sports (Football, Basketball, NFL, Baseball, Hockey, Rugby, Handball, Volleyball)
+## Adding a new sport
 
-Each has three hooks following the pattern `use{Sport}{Entity}`:
-- **Leagues**: `useFootballLeagues`, `useBasketballLeagues`, `useNflLeagues`, etc.
-- **Teams**: `useFootballTeams`, `useBasketballTeams`, `useNflTeams`, etc.
-- **Games/Matches**: `useFootballMatches`, `useBasketballGames`, `useNflGames`, etc.
+1. `src/hooks/sports/{sport}/` with `use{Sport}{Entity}.ts` files following an existing sport.
+2. `index.ts` re-exporting them; add `export * from './{sport}';` to `src/hooks/sports/index.ts`.
+3. Add tests under `__tests__/`; run `bun run verify`.
 
-Note: Football uses "Matches" (wrapping the API's "Fixtures"); all other team sports use "Games".
+## CI / publish
 
-### MMA (different entity structure)
+- `.github/workflows/ci-cd.yml` calls the reusable `johnqh/workflows/.github/workflows/unified-cicd.yml@main`
+  with `publish-target: github` (GitHub Packages). Triggers on push/PR to `main` and `develop`.
+- `prepublishOnly` runs `clean && build` automatically. `publishConfig.access: "public"`.
 
-- `useMmaCategories` - Weight classes (returns strings, not objects)
-- `useMmaFighters` - Individual fighters
-- `useMmaFights` - Fight events
+## Ecosystem
 
-### F1 (four entity types, unlike the standard three)
-
-- `useF1Drivers` - F1 drivers
-- `useF1Teams` - F1 teams/constructors
-- `useF1Races` - F1 race events
-- `useF1Circuits` - F1 circuits/tracks
-
-### Non-Sport Hooks
-
-- `useFavorites` (`src/hooks/useFavorites.ts`) - Wraps the raw indexer_client `useFavorites` hook and enriches favorites with resolved display names and images via `IndexerClient.getSportsData()`. Uses 24-hour cache for name resolution.
-- `useDiscussionForEntity` (`src/hooks/useDiscussionForEntity.ts`) - Composition hook combining discussion metadata with auth state. Checks discussion locked status and determines if user can post comments.
-
-## Testing
-
-### Setup
-
-- **Framework**: Vitest 4 with happy-dom environment
-- **React Testing**: `@testing-library/react` with `renderHook` and `act`
-- **Coverage**: v8 provider, 70% threshold for branches/functions/lines/statements
-- **Mocking**: `vi.mock()` for `@sudobility/heavymath_indexer_client`
-
-### Current Test Coverage
-
-All 10 sports have full test coverage (32 test files, 187 tests total):
-
-- **Football**: `useFootballLeagues.test.ts`, `useFootballTeams.test.ts`, `useFootballMatches.test.ts`
-- **Basketball**: `useBasketballLeagues.test.ts`, `useBasketballTeams.test.ts`, `useBasketballGames.test.ts`
-- **NFL**: `useNflLeagues.test.ts`, `useNflTeams.test.ts`, `useNflGames.test.ts`
-- **Baseball**: `useBaseballLeagues.test.ts`, `useBaseballTeams.test.ts`, `useBaseballGames.test.ts`
-- **Hockey**: `useHockeyLeagues.test.ts`, `useHockeyTeams.test.ts`, `useHockeyGames.test.ts`
-- **Rugby**: `useRugbyLeagues.test.ts`, `useRugbyTeams.test.ts`, `useRugbyGames.test.ts`
-- **Handball**: `useHandballLeagues.test.ts`, `useHandballTeams.test.ts`, `useHandballGames.test.ts`
-- **Volleyball**: `useVolleyballLeagues.test.ts`, `useVolleyballTeams.test.ts`, `useVolleyballGames.test.ts`
-- **MMA**: `useMmaCategories.test.ts`, `useMmaFighters.test.ts`, `useMmaFights.test.ts`
-- **F1**: `useF1Drivers.test.ts`, `useF1Teams.test.ts`, `useF1Races.test.ts`, `useF1Circuits.test.ts`
-
-Plus smoke tests in `src/__tests__/index.test.ts` (10 tests verifying all hooks are properly exported).
-
-### Test Pattern
-
-Every hook test follows this structure:
-
-```typescript
-// 1. Mock both dependencies before imports
-vi.mock('@sudobility/heavymath_indexer_client', () => ({ useXxx: vi.fn(), useFavorites: vi.fn() }));
-
-// 2. Import the mocked functions
-import { useXxx } from '@sudobility/heavymath_indexer_client';
-import { useFavorites } from '@sudobility/heavymath_indexer_client';
-
-// 3. Create QueryClientProvider wrapper
-const createWrapper = () => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return ({ children }) => createElement(QueryClientProvider, { client: queryClient }, children);
-};
-
-// 4. Set up default mocks in beforeEach, test rendering with renderHook + wrapper
-```
-
-### Running Tests
-
-```bash
-bun run test              # Single run
-bun run test:watch        # Watch mode
-```
-
-## Dependencies
-
-### Peer Dependencies (must be provided by the consuming app)
-
-| Package | Purpose |
-|---------|---------|
-| `@sudobility/heavymath_indexer_client` | `useFavorites`, `IndexerClient`, `WalletFavoriteData` |
-| `@sudobility/heavymath_contracts` | Smart contract interactions |
-| `@sudobility/heavymath_types` | Shared type definitions |
-| `@sudobility/auctions_contracts` | Auction contract interactions |
-| `@sudobility/types` | Core shared types |
-| `@tanstack/react-query` | >=5.0.0 - Data fetching/caching layer |
-| `react` | >=18.0.0 |
-
-### Key Dev Dependencies
-
-- TypeScript 5.9, Vitest 4, ESLint 9 (flat config), Prettier 3
-- `@testing-library/react` for hook testing
-- `happy-dom` as test DOM environment
-
-## Code Patterns and Conventions
-
-### TypeScript
-
-- Strict mode with all strict flags enabled
-- `noUnusedLocals` and `noUnusedParameters` enforced
-- Prefix unused variables/params with `_` (enforced by ESLint rule)
-- Target ES2020, module ESNext, bundler resolution
-- JSX mode: `react`
-
-### ESLint
-
-- Flat config format (eslint.config.js)
-- TypeScript + Prettier + react-hooks plugins
-- `react-hooks/exhaustive-deps`: warn
-- `@typescript-eslint/no-explicit-any`: off (allowed)
-- `prefer-const`, `no-var`, `object-shorthand`, `prefer-template`: error
-- Test files have relaxed rules (any allowed, console allowed)
-- Test files are excluded from lint entirely via ignores
-
-### Prettier
-
-- Single quotes, semicolons, trailing commas (es5)
-- 80 character line width, 2-space indent
-- Arrow parens: avoid (`x => x` not `(x) => x`)
-- LF line endings
-
-### File Organization
-
-- Each sport is a directory under `src/hooks/sports/`
-- Each sport directory has an `index.ts` that re-exports its hooks
-- Tests go in `__tests__/` subdirectory within the sport directory
-- Interface types are co-located with the hook that uses them (not in a separate types/ directory)
-
-### Naming Conventions
-
-- Hook files: `use{Sport}{Entity}.ts` (e.g., `useFootballLeagues.ts`)
-- WithFavorite types: `{Sport}{Entity}WithFavorite` (e.g., `FootballLeagueWithFavorite`)
-- Options types: `Use{Sport}{Entity}Options`
-- Result types: `Use{Sport}{Entity}Result`
-- Favorites constants: `FAVORITES_CATEGORY`, `FAVORITES_SUBCATEGORY`, `FAVORITES_TYPE` (file-level const)
-
-## Adding a New Sport
-
-1. Create `src/hooks/sports/{sport}/` directory
-2. Create hook files following the existing pattern (leagues, teams, games/matches)
-3. Create `index.ts` re-exporting all hooks
-4. Add `export * from './{sport}';` to `src/hooks/sports/index.ts`
-5. Add tests in `__tests__/` subdirectory
-6. Run `bun run verify`
-
-## Common Pitfalls
-
-- **Use `bun run verify`** to run all checks (typecheck + lint + test) before committing.
-- **No `test:run` script.** The `test` script already does `vitest run` (single run). Use `test:watch` for watch mode.
-- **No `test:coverage` script.** Run `bunx vitest run --coverage` directly.
-- **Football uses "Matches" wrapping "Fixtures"** from the API. The hook is `useFootballMatches` but internally calls `useFootballFixtures` from the API client.
-- **MMA has different entity names** than other sports: categories (not leagues), fighters (not teams), fights (not games).
-- **F1 has four entity types** (drivers, teams, races, circuits) instead of the standard three.
-- **Favorites ID conversion**: Sports API returns numeric IDs, but favorites stores string IDs. All hooks do `String(numericId)` when comparing or storing.
-- **`isLoading` combines both queries**: A hook reports `isLoading: true` when either the sports data OR the favorites are still loading.
-- **Error state only reflects sports data**: `isError` and `error` come from the sports API query, not from the favorites query.
-- **Build uses `tsconfig.build.json`**, not `tsconfig.json`. The build config extends the base but excludes test files and `__tests__/` directories.
-- **CI/CD** uses a reusable GitHub Actions workflow at `.github/workflows/ci-cd.yml`. Triggers on push/PR to `main` and `develop`. Calls `johnqh/workflows/.github/workflows/unified-cicd.yml@main` with npm-access "restricted".
-
-## Build and Publish
-
-```bash
-bun run clean && bun run build    # Manual build
-bun publish                       # Runs prepublishOnly automatically (clean + build)
-```
-
-Output goes to `dist/` with `.js`, `.d.ts`, and `.d.ts.map` files. Only `dist/**/*` is included in the published package. Access is restricted (`publishConfig.access: "restricted"`).
-
-## Ecosystem Context
-
-This library adds business logic on top of the indexer client:
-
-```
-heavymath_contracts  (equilibrium algorithm originates here in Solidity)
-       ↓
-heavymath_indexer    (REST API including /api/sports/* proxy)
-       ↓
-heavymath_indexer_client  (proxy hooks: useFootballLeagues, useFavorites, etc.)
-       ↓ peer dependency
-heavymath_lib        ← YOU ARE HERE (merges sports + favorites)
-       ↓
-heavymath_app        (consumes the merged hooks)
-```
-
-### What This Library Actually Does
-
-1. **Sports + Favorites Merging**: Each hook (e.g., `useFootballLeagues`) calls the indexer_client proxy hook to fetch sports data AND `useFavorites` to fetch the user's favorites, then merges them so every item has a `favorited: boolean` field and optionally a `favoriteCount: number`.
-
-2. **Market module** (`src/market/`): Previously contained off-chain equilibrium calculation code. The equilibrium source has been removed; `src/market/index.ts` is now an empty export (`export {}`). Stale build artifacts may remain in `dist/market/` from prior builds — these are not used and will be cleaned on the next `bun run clean && bun run build`.
-
-### Dependency Chain
-
-This library depends on `@sudobility/heavymath_indexer_client` as a **peer dependency**. The proxy hooks it wraps (e.g., `useFootballLeagues` from indexer_client) call the indexer's `/api/sports/:sport/*` endpoint, which proxies to api-sports.io with TTL caching.
-
-When indexer_client adds new sports proxy hooks, corresponding wrapper hooks should be added here to include favorites support.
-
-## Git Workflow
-
-- Do not use feature branches for code changes. Always stay on the current branch.
+`heavymath_contracts` (Solidity) → `heavymath_indexer` (REST, incl. `/api/sports/*` proxy) →
+`heavymath_indexer_client` (proxy + favorites hooks) → **heavymath_lib** (adds favorites merge) →
+`heavymath_app` (consumer). When indexer_client adds a sports proxy hook, add a wrapper here.
